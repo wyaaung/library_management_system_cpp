@@ -4,58 +4,57 @@ Library::Library() {}
 
 Library::~Library() {}
 
-bool Library::add_document(document_type t, const std::string_view title, const std::string_view author, int issue, int quantity) {
-  std::unique_ptr<Document> d;
+bool Library::add_document(document_type type, const std::string_view title, const std::string_view author, int issue, int quantity) {
+  std::unique_ptr<Document> document;
 
-  switch (t) {
+  switch (type) {
     case DOC_NOVEL:
-      d = std::make_unique<Novel>(title, author, quantity);
+      document = std::make_unique<Novel>(title, author, quantity);
       break;
 
     case DOC_COMIC:
-      d = std::make_unique<Comic>(title, author, issue, quantity);
+      document = std::make_unique<Comic>(title, author, issue, quantity);
       break;
 
     case DOC_MAGAZINE:
-      d = std::make_unique<Magazine>(title, issue, quantity);
+      document = std::make_unique<Magazine>(title, issue, quantity);
       break;
 
     default:
       return false;
   }
 
-  return add_document(std::move(d));
+  return add_document(std::move(document));
 }
 
-bool Library::add_document(std::unique_ptr<Document> d) {
-  if (search_document(d->get_title()) != nullptr)
+bool Library::add_document(std::unique_ptr<Document> document) {
+  if (search_document(document->get_title()) != nullptr)
     return false;
 
-  _docs.push_back(std::move(d));
+  _docs.push_back(std::move(document));
   return true;
 }
 
-int Library::add_document(Document* d) {
-    std::unique_ptr<Document> docPtr(d);
+int Library::add_document(Document* document) {
+    std::unique_ptr<Document> docPtr(document);
     return add_document(std::move(docPtr));
 }
 
 bool Library::delete_document(const std::string_view title) {
-  // Find the document by title
   auto it = std::find_if(_docs.begin(), _docs.end(),
                          [&title](const std::unique_ptr<Document>& doc) { return doc->get_title() == title; });
+
   if (it != _docs.end()) {
-    _docs.erase(it); // Remove the document if found
-    return true; // Return true on successful deletion
+    _docs.erase(it);
+    return true;
   }
 
-  return false; // Return false if the document is not found
+  return false;
 }
 
-int Library::count_document_of_type(document_type t) {
-  // Count and return the number of documents of the specified type
+int Library::count_document_of_type(document_type type) {
   return std::count_if(_docs.begin(), _docs.end(),
-                       [t](const std::unique_ptr<Document>& doc) { return doc->get_document_type() == t; });
+                       [type](const std::unique_ptr<Document>& doc) { return doc->get_document_type() == type; });
 }
 
 std::unique_ptr<Document> Library::search_document(const std::string_view title) {
